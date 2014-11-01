@@ -62,7 +62,8 @@ type Channel struct {
 	deleter        sync.Once
 
 	// Stats tracking
-	e2eProcessingLatencyStream *util.Quantile
+	e2eProcessingLatencyStream    *util.Quantile
+	clientProcessingLatencyStream *util.Quantile
 
 	// TODO: these can be DRYd up
 	deferredMessages map[MessageID]*pqueue.Item
@@ -96,7 +97,12 @@ func NewChannel(topicName string, channelName string, ctx *context,
 			ctx.nsqd.opts.E2EProcessingLatencyPercentiles,
 		)
 	}
-
+	if len(ctx.nsqd.opts.ClientProcessingLatencyPercentiles) > 0 {
+		c.clientProcessingLatencyStream = util.NewQuantile(
+			ctx.nsqd.opts.ClientProcessingLatencyWindowTime,
+			ctx.nsqd.opts.ClientProcessingLatencyPercentiles,
+		)
+	}
 	c.initPQ()
 
 	if strings.HasSuffix(channelName, "#ephemeral") {
@@ -372,6 +378,9 @@ func (c *Channel) FinishMessage(clientID int64, id MessageID) error {
 	c.removeFromInFlightPQ(msg)
 	if c.e2eProcessingLatencyStream != nil {
 		c.e2eProcessingLatencyStream.Insert(msg.Timestamp)
+	}
+	if c.clientProcessingLatencyStream != nil {
+		c.clientProcessingLatencyStream.Insert(msg.deliveryTS.UnixNano())
 	}
 	return nil
 }

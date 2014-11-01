@@ -252,7 +252,8 @@ func metricType(key string) string {
 		"gc_runs":         "counter",
 		"heap_objects":    "gauge",
 
-		"e2e_processing_latency": "gauge",
+		"e2e_processing_latency":    "gauge",
+		"client_processing_latency": "gauge",
 	}[key]
 }
 

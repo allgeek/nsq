@@ -249,6 +249,9 @@ func (s *httpServer) topicHandler(w http.ResponseWriter, req *http.Request) {
 	hasE2eLatency := globalTopicStats.E2eProcessingLatency != nil &&
 		len(globalTopicStats.E2eProcessingLatency.Percentiles) > 0
 
+	hasClientLatency := globalTopicStats.ClientProcessingLatency != nil &&
+		len(globalTopicStats.ClientProcessingLatency.Percentiles) > 0
+
 	var firstTopic *lookupd.TopicStats
 	if len(topicStats) > 0 {
 		firstTopic = topicStats[0]
@@ -265,6 +268,7 @@ func (s *httpServer) topicHandler(w http.ResponseWriter, req *http.Request) {
 		GlobalTopicStats *lookupd.TopicStats
 		ChannelStats     map[string]*lookupd.ChannelStats
 		HasE2eLatency    bool
+		HasClientLatency bool
 	}{
 		Title:            fmt.Sprintf("NSQ %s", topicName),
 		GraphOptions:     NewGraphOptions(w, req, reqParams, s.ctx),
@@ -276,6 +280,7 @@ func (s *httpServer) topicHandler(w http.ResponseWriter, req *http.Request) {
 		GlobalTopicStats: globalTopicStats,
 		ChannelStats:     channelStats,
 		HasE2eLatency:    hasE2eLatency,
+		HasClientLatency: hasClientLatency,
 	}
 	err = templates.T.ExecuteTemplate(w, "topic.html", p)
 	if err != nil {
@@ -305,31 +310,36 @@ func (s *httpServer) channelHandler(w http.ResponseWriter, req *http.Request, to
 	hasE2eLatency := channelStats.E2eProcessingLatency != nil &&
 		len(channelStats.E2eProcessingLatency.Percentiles) > 0
 
+	hasClientLatency := channelStats.ClientProcessingLatency != nil &&
+		len(channelStats.ClientProcessingLatency.Percentiles) > 0
+
 	var firstHost *lookupd.ChannelStats
 	if len(channelStats.HostStats) > 0 {
 		firstHost = channelStats.HostStats[0]
 	}
 
 	p := struct {
-		Title          string
-		GraphOptions   *GraphOptions
-		Version        string
-		Topic          string
-		Channel        string
-		TopicProducers []string
-		ChannelStats   *lookupd.ChannelStats
-		FirstHost      *lookupd.ChannelStats
-		HasE2eLatency  bool
+		Title            string
+		GraphOptions     *GraphOptions
+		Version          string
+		Topic            string
+		Channel          string
+		TopicProducers   []string
+		ChannelStats     *lookupd.ChannelStats
+		FirstHost        *lookupd.ChannelStats
+		HasE2eLatency    bool
+		HasClientLatency bool
 	}{
-		Title:          fmt.Sprintf("NSQ %s / %s", topicName, channelName),
-		GraphOptions:   NewGraphOptions(w, req, reqParams, s.ctx),
-		Version:        util.BINARY_VERSION,
-		Topic:          topicName,
-		Channel:        channelName,
-		TopicProducers: producers,
-		ChannelStats:   channelStats,
-		FirstHost:      firstHost,
-		HasE2eLatency:  hasE2eLatency,
+		Title:            fmt.Sprintf("NSQ %s / %s", topicName, channelName),
+		GraphOptions:     NewGraphOptions(w, req, reqParams, s.ctx),
+		Version:          util.BINARY_VERSION,
+		Topic:            topicName,
+		Channel:          channelName,
+		TopicProducers:   producers,
+		ChannelStats:     channelStats,
+		FirstHost:        firstHost,
+		HasE2eLatency:    hasE2eLatency,
+		HasClientLatency: hasClientLatency,
 	}
 
 	err = templates.T.ExecuteTemplate(w, "channel.html", p)

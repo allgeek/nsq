@@ -379,20 +379,28 @@ finish:
 	return nil
 }
 
-func (t *Topic) AggregateChannelE2eProcessingLatency() *util.Quantile {
-	var latencyStream *util.Quantile
+func (t *Topic) AggregateChannelProcessingLatency() (*util.Quantile, *util.Quantile) {
+	var e2eLatencyStream, clientLatencyStream *util.Quantile
 	for _, c := range t.channelMap {
-		if c.e2eProcessingLatencyStream == nil {
-			continue
+		if c.e2eProcessingLatencyStream != nil {
+			if e2eLatencyStream == nil {
+				e2eLatencyStream = util.NewQuantile(
+					t.ctx.nsqd.opts.E2EProcessingLatencyWindowTime,
+					t.ctx.nsqd.opts.E2EProcessingLatencyPercentiles)
+			}
+			e2eLatencyStream.Merge(c.e2eProcessingLatencyStream)
 		}
-		if latencyStream == nil {
-			latencyStream = util.NewQuantile(
-				t.ctx.nsqd.opts.E2EProcessingLatencyWindowTime,
-				t.ctx.nsqd.opts.E2EProcessingLatencyPercentiles)
+		if c.clientProcessingLatencyStream != nil {
+			if clientLatencyStream == nil {
+				clientLatencyStream = util.NewQuantile(
+					t.ctx.nsqd.opts.ClientProcessingLatencyWindowTime,
+					t.ctx.nsqd.opts.ClientProcessingLatencyPercentiles)
+			}
+			clientLatencyStream.Merge(c.clientProcessingLatencyStream)
 		}
-		latencyStream.Merge(c.e2eProcessingLatencyStream)
 	}
-	return latencyStream
+
+	return e2eLatencyStream, clientLatencyStream
 }
 
 func (t *Topic) Pause() error {

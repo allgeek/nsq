@@ -51,6 +51,10 @@ type nsqdOptions struct {
 	E2EProcessingLatencyWindowTime  time.Duration `flag:"e2e-processing-latency-window-time"`
 	E2EProcessingLatencyPercentiles []float64     `flag:"e2e-processing-latency-percentile" cfg:"e2e_processing_latency_percentiles"`
 
+	// client processing message latency
+	ClientProcessingLatencyWindowTime  time.Duration `flag:"client-processing-latency-window-time"`
+	ClientProcessingLatencyPercentiles []float64     `flag:"client-processing-latency-percentile" cfg:"client_processing_latency_percentiles"`
+
 	// TLS config
 	TLSCert             string `flag:"tls-cert"`
 	TLSKey              string `flag:"tls-key"`
@@ -99,7 +103,8 @@ func NewNSQDOptions() *nsqdOptions {
 		StatsdInterval: 60 * time.Second,
 		StatsdMemStats: true,
 
-		E2EProcessingLatencyWindowTime: time.Duration(10 * time.Minute),
+		E2EProcessingLatencyWindowTime:    time.Duration(10 * time.Minute),
+		ClientProcessingLatencyWindowTime: time.Duration(10 * time.Minute),
 
 		DeflateEnabled:  true,
 		MaxDeflateLevel: 6,

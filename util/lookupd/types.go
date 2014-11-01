@@ -59,8 +59,9 @@ type TopicStats struct {
 	Channels     []*ChannelStats
 	Paused       bool
 
-	E2eProcessingLatency *util.E2eProcessingLatencyAggregate
-	numAggregates        int
+	E2eProcessingLatency    *util.ProcessingLatencyAggregate
+	ClientProcessingLatency *util.ProcessingLatencyAggregate
+	numAggregates           int
 }
 
 func (t *TopicStats) Add(a *TopicStats) {
@@ -78,6 +79,7 @@ func (t *TopicStats) Add(a *TopicStats) {
 	}
 	t.numAggregates += 1
 	t.E2eProcessingLatency = t.E2eProcessingLatency.Add(a.E2eProcessingLatency, t.numAggregates)
+	t.ClientProcessingLatency = t.ClientProcessingLatency.Add(a.ClientProcessingLatency, t.numAggregates)
 }
 
 func (t *TopicStats) Target(key string) ([]string, string) {
@@ -115,7 +117,8 @@ type ChannelStats struct {
 	Clients       []*ClientStats
 	Paused        bool
 
-	E2eProcessingLatency *util.E2eProcessingLatencyAggregate
+	E2eProcessingLatency    *util.ProcessingLatencyAggregate
+	ClientProcessingLatency *util.ProcessingLatencyAggregate
 }
 
 func (c *ChannelStats) Add(a *ChannelStats) {
@@ -133,6 +136,7 @@ func (c *ChannelStats) Add(a *ChannelStats) {
 	}
 	c.HostStats = append(c.HostStats, a)
 	c.E2eProcessingLatency = c.E2eProcessingLatency.Add(a.E2eProcessingLatency, len(c.HostStats))
+	c.ClientProcessingLatency = c.ClientProcessingLatency.Add(a.ClientProcessingLatency, len(c.HostStats))
 	sort.Sort(ChannelStatsByHost{c.HostStats})
 }
 

@@ -80,7 +80,7 @@ statsd_interval = "60s"
 statsd_mem_stats = true
 
 
-## message processing time percentiles to keep track of (float)
+## end-to-end message processing time percentiles to keep track of (float)
 e2e_processing_latency_percentiles = [
     100.0,
     99.0,
@@ -89,6 +89,17 @@ e2e_processing_latency_percentiles = [
 
 ## calculate end to end latency quantiles for this duration of time (time.Duration)
 e2e_processing_latency_window_time = "10m"
+
+
+## client message processing time percentiles to keep track of (float)
+client_processing_latency_percentiles = [
+    100.0,
+    99.0,
+    95.0
+]
+
+## calculate client processing latency quantiles for this duration of time (time.Duration)
+client_processing_latency_window_time = "10m"
 
 
 ## path to certificate file

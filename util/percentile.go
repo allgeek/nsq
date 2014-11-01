@@ -122,7 +122,7 @@ func (q *Quantile) moveWindow() {
 	q.currentStream.Reset()
 }
 
-type E2eProcessingLatencyAggregate struct {
+type ProcessingLatencyAggregate struct {
 	Count       int                  `json:"count"`
 	Percentiles []map[string]float64 `json:"percentiles"`
 	Topic       string               `json:"topic"`
@@ -130,16 +130,16 @@ type E2eProcessingLatencyAggregate struct {
 	Addr        string               `json:"host"`
 }
 
-func (e *E2eProcessingLatencyAggregate) Target(key string) ([]string, string) {
-	targets := make([]string, 0, len(e.Percentiles))
+func (p *ProcessingLatencyAggregate) Target(key string) ([]string, string) {
+	targets := make([]string, 0, len(p.Percentiles))
 	var target string
-	for _, percentile := range e.Percentiles {
-		if e.Channel != "" {
-			target = fmt.Sprintf(`%%stopic.%s.channel.%s.%s_%.0f`, e.Topic, e.Channel, key, percentile["quantile"]*100.0)
+	for _, percentile := range p.Percentiles {
+		if p.Channel != "" {
+			target = fmt.Sprintf(`%%stopic.%s.channel.%s.%s_%.0f`, p.Topic, p.Channel, key, percentile["quantile"]*100.0)
 		} else {
-			target = fmt.Sprintf(`%%stopic.%s.%s_%.0f`, e.Topic, key, percentile["quantile"]*100.0)
+			target = fmt.Sprintf(`%%stopic.%s.%s_%.0f`, p.Topic, key, percentile["quantile"]*100.0)
 		}
-		if e.Addr == "*" {
+		if p.Addr == "*" {
 			target = fmt.Sprintf(`averageSeries(%s)`, target)
 		}
 		target = fmt.Sprintf(`scale(%s,0.000001)`, target)
@@ -148,11 +148,11 @@ func (e *E2eProcessingLatencyAggregate) Target(key string) ([]string, string) {
 	return targets, ""
 }
 
-func (e *E2eProcessingLatencyAggregate) Host() string {
-	return e.Addr
+func (p *ProcessingLatencyAggregate) Host() string {
+	return p.Addr
 }
 
-func E2eProcessingLatencyAggregateFromJson(j *simplejson.Json, topic, channel, host string) *E2eProcessingLatencyAggregate {
+func ProcessingLatencyAggregateFromJson(j *simplejson.Json, topic, channel, host string) *ProcessingLatencyAggregate {
 	count := j.Get("count").MustInt()
 
 	rawPercentiles := j.Get("percentiles")
@@ -171,7 +171,7 @@ func E2eProcessingLatencyAggregateFromJson(j *simplejson.Json, topic, channel, h
 		percentiles[i]["count"] = float64(count)
 	}
 
-	return &E2eProcessingLatencyAggregate{
+	return &ProcessingLatencyAggregate{
 		Count:       count,
 		Percentiles: percentiles,
 		Topic:       topic,
@@ -180,15 +180,15 @@ func E2eProcessingLatencyAggregateFromJson(j *simplejson.Json, topic, channel, h
 	}
 }
 
-func (e *E2eProcessingLatencyAggregate) Len() int { return len(e.Percentiles) }
-func (e *E2eProcessingLatencyAggregate) Swap(i, j int) {
-	e.Percentiles[i], e.Percentiles[j] = e.Percentiles[j], e.Percentiles[i]
+func (p *ProcessingLatencyAggregate) Len() int { return len(p.Percentiles) }
+func (p *ProcessingLatencyAggregate) Swap(i, j int) {
+	p.Percentiles[i], p.Percentiles[j] = p.Percentiles[j], p.Percentiles[i]
 }
-func (e *E2eProcessingLatencyAggregate) Less(i, j int) bool {
-	return e.Percentiles[i]["percentile"] > e.Percentiles[j]["percentile"]
+func (p *ProcessingLatencyAggregate) Less(i, j int) bool {
+	return p.Percentiles[i]["percentile"] > p.Percentiles[j]["percentile"]
 }
 
-func (A *E2eProcessingLatencyAggregate) Add(B *E2eProcessingLatencyAggregate, N int) *E2eProcessingLatencyAggregate {
+func (A *ProcessingLatencyAggregate) Add(B *ProcessingLatencyAggregate, N int) *ProcessingLatencyAggregate {
 	if A == nil {
 		a := *B
 		A = &a

@@ -357,7 +357,8 @@ func GetNSQDStats(nsqdHTTPAddrs []string, selectedTopic string) ([]*TopicStats, 
 				backendDepth := t.Get("backend_depth").MustInt64()
 				channels := t.Get("channels").MustArray()
 
-				e2eProcessingLatency := util.E2eProcessingLatencyAggregateFromJson(t.Get("e2e_processing_latency"), topicName, "", addr)
+				e2eProcessingLatency := util.ProcessingLatencyAggregateFromJson(t.Get("e2e_processing_latency"), topicName, "", addr)
+				clientProcessingLatency := util.ProcessingLatencyAggregateFromJson(t.Get("client_processing_latency"), topicName, "", addr)
 
 				topicStats := &TopicStats{
 					HostAddress:  addr,
@@ -369,7 +370,8 @@ func GetNSQDStats(nsqdHTTPAddrs []string, selectedTopic string) ([]*TopicStats, 
 					ChannelCount: len(channels),
 					Paused:       t.Get("paused").MustBool(),
 
-					E2eProcessingLatency: e2eProcessingLatency,
+					E2eProcessingLatency:    e2eProcessingLatency,
+					ClientProcessingLatency: clientProcessingLatency,
 				}
 				topicStatsList = append(topicStatsList, topicStats)
 
@@ -396,7 +398,8 @@ func GetNSQDStats(nsqdHTTPAddrs []string, selectedTopic string) ([]*TopicStats, 
 					backendDepth := c.Get("backend_depth").MustInt64()
 					clients := c.Get("clients").MustArray()
 
-					e2eProcessingLatency := util.E2eProcessingLatencyAggregateFromJson(c.Get("e2e_processing_latency"), topicName, channelName, addr)
+					e2eProcessingLatency := util.ProcessingLatencyAggregateFromJson(c.Get("e2e_processing_latency"), topicName, channelName, addr)
+					clientProcessingLatency := util.ProcessingLatencyAggregateFromJson(c.Get("client_processing_latency"), topicName, channelName, addr)
 
 					hostChannelStats := &ChannelStats{
 						HostAddress:   addr,
@@ -412,7 +415,8 @@ func GetNSQDStats(nsqdHTTPAddrs []string, selectedTopic string) ([]*TopicStats, 
 						RequeueCount:  c.Get("requeue_count").MustInt64(),
 						TimeoutCount:  c.Get("timeout_count").MustInt64(),
 
-						E2eProcessingLatency: e2eProcessingLatency,
+						E2eProcessingLatency:    e2eProcessingLatency,
+						ClientProcessingLatency: clientProcessingLatency,
 						// TODO: this is sort of wrong; clients should be de-duped
 						// client A that connects to NSQD-a and NSQD-b should only be counted once. right?
 						ClientCount: len(clients),

@@ -74,6 +74,9 @@ func init() {
             {{if $firstHost.E2eProcessingLatency.Percentiles}}
               <th colspan="{{len $firstHost.E2eProcessingLatency.Percentiles}}">E2E Processing Latency</th>
             {{end}}
+            {{if $firstHost.ClientProcessingLatency.Percentiles}}
+              <th colspan="{{len $firstHost.ClientProcessingLatency.Percentiles}}">Client Processing Latency</th>
+            {{end}}
         </tr>
         <tr>
             <th>NSQd Host</th>
@@ -88,6 +91,9 @@ func init() {
             <th>Connections</th>
             {{range $e2e := $firstHost.E2eProcessingLatency.Percentiles}}
               <th>{{$e2e.quantile | floatToPercent}}<sup>{{$e2e.quantile | percSuffix}}</sup></th>
+            {{end}}
+            {{range $percentile := $firstHost.ClientProcessingLatency.Percentiles}}
+              <th>{{$percentile.quantile | floatToPercent}}<sup>{{$percentile.quantile | percSuffix}}</sup></th>
             {{end}}
         </tr>
     </thead>
@@ -112,6 +118,13 @@ func init() {
                 </td>
               {{end}}
             {{end}}
+            {{if $c.ClientProcessingLatency.Percentiles}}
+              {{range $percentile := $c.ClientProcessingLatency.Percentiles}}
+                <td>
+                  <span title="{{$percentile.quantile | floatToPercent}}: min = {{$percentile.min | nanotohuman}}, max = {{$percentile.max | nanotohuman}}">{{$percentile.average | nanotohuman}}</span>
+                </td>
+              {{end}}
+            {{end}}
         </tr>
         {{if $g.Enabled}}
         <tr class="graph-row">
@@ -128,6 +141,11 @@ func init() {
             {{if $c.E2eProcessingLatency.Percentiles}}
                 <td colspan="{{len $c.E2eProcessingLatency.Percentiles}}">
                     <a href="{{$g.LargeGraph $c.E2eProcessingLatency "e2e_processing_latency"}}"><img width="120" height="20"  src="{{$g.Sparkline $c.E2eProcessingLatency "e2e_processing_latency"}}"></a>
+                </td>
+            {{end}}
+            {{if $c.ClientProcessingLatency.Percentiles}}
+                <td colspan="{{len $c.ClientProcessingLatency.Percentiles}}">
+                    <a href="{{$g.LargeGraph $c.ClientProcessingLatency "client_processing_latency"}}"><img width="120" height="20"  src="{{$g.Sparkline $c.ClientProcessingLatency "client_processing_latency"}}"></a>
                 </td>
             {{end}}
         </tr>
@@ -153,6 +171,13 @@ func init() {
                 </td>
               {{end}}
             {{end}}
+            {{if $c.ClientProcessingLatency.Percentiles}}
+              {{range $percentile := $c.ClientProcessingLatency.Percentiles}}
+                <td>
+                  <span title="{{$percentile.quantile | floatToPercent}}: min = {{$percentile.min | nanotohuman}}, max = {{$percentile.max | nanotohuman}}">{{$percentile.average | nanotohuman}}</span>
+                </td>
+              {{end}}
+            {{end}}
         </tr>
         {{if $g.Enabled}}
         <tr class="info graph-row">
@@ -169,6 +194,11 @@ func init() {
             {{if $c.E2eProcessingLatency.Percentiles}}
                 <td colspan="{{len $c.E2eProcessingLatency.Percentiles}}">
                     <a href="{{$g.LargeGraph $c.E2eProcessingLatency "e2e_processing_latency"}}"><img width="120" height="20"  src="{{$g.Sparkline $c.E2eProcessingLatency "e2e_processing_latency"}}"></a>
+                </td>
+            {{end}}
+            {{if $c.ClientProcessingLatency.Percentiles}}
+                <td colspan="{{len $c.ClientProcessingLatency.Percentiles}}">
+                    <a href="{{$g.LargeGraph $c.ClientProcessingLatency "client_processing_latency"}}"><img width="120" height="20"  src="{{$g.Sparkline $c.ClientProcessingLatency "client_processing_latency"}}"></a>
                 </td>
             {{end}}
         </tr>

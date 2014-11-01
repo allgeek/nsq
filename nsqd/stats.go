@@ -14,10 +14,13 @@ type TopicStats struct {
 	MessageCount uint64         `json:"message_count"`
 	Paused       bool           `json:"paused"`
 
-	E2eProcessingLatency *util.PercentileResult `json:"e2e_processing_latency"`
+	E2eProcessingLatency    *util.PercentileResult `json:"e2e_processing_latency"`
+	ClientProcessingLatency *util.PercentileResult `json:"client_processing_latency"`
 }
 
 func NewTopicStats(t *Topic, channels []ChannelStats) TopicStats {
+	e2eAggregate, clientAggregate := t.AggregateChannelProcessingLatency()
+
 	return TopicStats{
 		TopicName:    t.name,
 		Channels:     channels,
@@ -26,7 +29,8 @@ func NewTopicStats(t *Topic, channels []ChannelStats) TopicStats {
 		MessageCount: t.messageCount,
 		Paused:       t.IsPaused(),
 
-		E2eProcessingLatency: t.AggregateChannelE2eProcessingLatency().PercentileResult(),
+		E2eProcessingLatency:    e2eAggregate.PercentileResult(),
+		ClientProcessingLatency: clientAggregate.PercentileResult(),
 	}
 }
 
@@ -42,7 +46,8 @@ type ChannelStats struct {
 	Clients       []ClientStats `json:"clients"`
 	Paused        bool          `json:"paused"`
 
-	E2eProcessingLatency *util.PercentileResult `json:"e2e_processing_latency"`
+	E2eProcessingLatency    *util.PercentileResult `json:"e2e_processing_latency"`
+	ClientProcessingLatency *util.PercentileResult `json:"client_processing_latency"`
 }
 
 func NewChannelStats(c *Channel, clients []ClientStats) ChannelStats {
@@ -58,7 +63,8 @@ func NewChannelStats(c *Channel, clients []ClientStats) ChannelStats {
 		Clients:       clients,
 		Paused:        c.IsPaused(),
 
-		E2eProcessingLatency: c.e2eProcessingLatencyStream.PercentileResult(),
+		E2eProcessingLatency:    c.e2eProcessingLatencyStream.PercentileResult(),
+		ClientProcessingLatency: c.clientProcessingLatencyStream.PercentileResult(),
 	}
 }
 

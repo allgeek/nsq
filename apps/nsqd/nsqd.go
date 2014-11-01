@@ -64,6 +64,10 @@ var (
 	e2eProcessingLatencyPercentiles = util.FloatArray{}
 	e2eProcessingLatencyWindowTime  = flagSet.Duration("e2e-processing-latency-window-time", 10*time.Minute, "calculate end to end latency quantiles for this duration of time (ie: 60s would only show quantile calculations from the past 60 seconds)")
 
+	// Client processing latency percentile flags
+	clientProcessingLatencyPercentiles = util.FloatArray{}
+	clientProcessingLatencyWindowTime  = flagSet.Duration("client-processing-latency-window-time", 10*time.Minute, "calculate client processing latency quantiles for this duration of time (ie: 60s would only show quantile calculations from the past 60 seconds)")
+
 	// TLS config
 	tlsCert             = flagSet.String("tls-cert", "", "path to certificate file")
 	tlsKey              = flagSet.String("tls-key", "", "path to private key file")
@@ -79,7 +83,8 @@ var (
 
 func init() {
 	flagSet.Var(&lookupdTCPAddrs, "lookupd-tcp-address", "lookupd TCP address (may be given multiple times)")
-	flagSet.Var(&e2eProcessingLatencyPercentiles, "e2e-processing-latency-percentile", "message processing time percentiles to keep track of (can be specified multiple times or comma separated, default none)")
+	flagSet.Var(&e2eProcessingLatencyPercentiles, "e2e-processing-latency-percentile", "end-to-end message processing time percentiles to keep track of (can be specified multiple times or comma separated, default none)")
+	flagSet.Var(&clientProcessingLatencyPercentiles, "client-processing-latency-percentile", "client message processing time percentiles to keep track of (can be specified multiple times or comma separated, default none)")
 	flagSet.Var(&authHttpAddresses, "auth-http-address", "<addr>:<port> to query auth server (may be given multiple times)")
 }
 
